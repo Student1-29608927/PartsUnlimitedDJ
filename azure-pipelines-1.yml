@@ -53,7 +53,10 @@ stages:
   dependsOn: [Build]
   jobs:  
   - deployment: deploy_dev
-    displayName: deploy Web App DEV    
+    displayName: deploy Web App DEV
+    variables:
+      WebsiteName: 'pul-yaml-29608927'
+      ResourceGroupName: 'rg-lod'    
     # Creates an environment if it doesn't exist.
     environment: 'partsunlimited_dev'
     strategy:
@@ -64,16 +67,30 @@ stages:
           - checkout: none 
           - script: echo my first deployment
           - task: CmdLine@2
+            enabled: false
             inputs:
               script: |
                 echo deploiement a dev
                 
                 echo bidon
+          - task: AzureRmWebAppDeployment@3
+            displayName: 'Azure App Service Deploy'
+            inputs:
+              azureSubscription: 'PUL-Connection'
+              WebAppName: '$(WebsiteName)'
+              DeployToSlotFlag: true
+              ResourceGroupName: '$(ResourceGroupName)'
+              SlotName: dev
+              Package: '$(Pipeline.Workspace)/**/PartsUnlimitedWebsite.zip'
+
 - stage: DeployProd
   dependsOn: [DeployDev]
   jobs:
   - deployment: deploy_prod
-    displayName: deploy Web App PROD   
+    displayName: deploy Web App PROD
+    variables:
+      WebsiteName: 'pul-yaml-29608927'
+      ResourceGroupName: 'rg-lod'
     # Creates an environment if it doesn't exist.
     environment: 'partsunlimited_prod'
     strategy:
@@ -82,8 +99,16 @@ stages:
         deploy:
           steps:
           - task: CmdLine@2
+            enabled: false
             inputs:
               script: |
                 echo deploiement a prod (swap slot)
                 
-                echo bidon
+                echo bidon          
+          - task: AzureAppServiceManage@0
+            displayName: 'Swap Slots: $(WebsiteName)'
+            inputs:
+              azureSubscription: 'PUL-Connection'
+              WebAppName: '$(WebsiteName)'
+              ResourceGroupName: '$(ResourceGroupName)'
+              SourceSlot: dev
