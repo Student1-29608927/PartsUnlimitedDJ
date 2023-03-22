@@ -51,23 +51,39 @@ stages:
         PathtoPublish: '$(build.artifactstagingdirectory)'
 - stage: DeployDev
   dependsOn: [Build]
-  jobs:
-  - job: deploy_dev
-    steps:
-    - task: CmdLine@2
-      inputs:
-        script: |
-          echo deploiement a dev
-          
-          echo bidon
+  jobs:  
+  - deployment: deploy_dev
+    displayName: deploy Web App DEV    
+    # Creates an environment if it doesn't exist.
+    environment: 'partsunlimited_dev'
+    strategy:
+      # Default deployment strategy, more coming...
+      runOnce:
+        deploy:
+          steps:
+          - checkout: none 
+          - script: echo my first deployment
+          - task: CmdLine@2
+            inputs:
+              script: |
+                echo deploiement a dev
+                
+                echo bidon
 - stage: DeployProd
   dependsOn: [DeployDev]
   jobs:
-  - job: deploy_prod
-    steps:
-    - task: CmdLine@2
-      inputs:
-        script: |
-          echo deploiement a prod (swap slot)
-          
-          echo bidon
+  - deployment: deploy_prod
+    displayName: deploy Web App PROD   
+    # Creates an environment if it doesn't exist.
+    environment: 'partsunlimited_prod'
+    strategy:
+      # Default deployment strategy, more coming...
+      runOnce:
+        deploy:
+          steps:
+          - task: CmdLine@2
+            inputs:
+              script: |
+                echo deploiement a prod (swap slot)
+                
+                echo bidon
