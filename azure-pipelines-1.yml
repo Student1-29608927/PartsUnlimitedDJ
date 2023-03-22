@@ -49,6 +49,7 @@ stages:
       inputs:
         PathtoPublish: '$(build.artifactstagingdirectory)'
 - stage: DeployDev
+  dependsOn: [Build]
   jobs:
   - job: deploy_dev
     steps:
@@ -59,6 +60,7 @@ stages:
           
           echo bidon
 - stage: DeployProd
+  dependsOn: [Build]
   jobs:
   - job: deploy_prod
     steps:
